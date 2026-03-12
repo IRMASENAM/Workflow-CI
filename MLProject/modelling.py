@@ -6,18 +6,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
-mlflow.sklearn.autolog()
-
-df = pd.read_csv("MLProject/heart_preprocessing.csv")
+df = pd.read_csv("heart_preprocessing.csv")
 
 X = df.drop("target", axis=1)
 y = df["target"]
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    random_state=42
+    X, y, test_size=0.2, random_state=42
 )
 
 with mlflow.start_run():
@@ -32,7 +27,5 @@ with mlflow.start_run():
 
     print("Accuracy:", acc)
 
-    mlflow.log_metric("accuracy_manual", acc)
-
-    # WAJIB supaya docker bisa build model
+    mlflow.log_metric("accuracy", acc)
     mlflow.sklearn.log_model(model, "model")

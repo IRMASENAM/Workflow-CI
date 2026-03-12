@@ -6,11 +6,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
-# Aktifkan autolog untuk sklearn
+# Aktifkan autolog
 mlflow.sklearn.autolog()
 
-# Load dataset preprocessing
-df = pd.read_csv("MLProject/heart_preprocessing.csv")
+# Load dataset
+df = pd.read_csv("heart_preprocessing.csv")
 
 # Pisahkan fitur dan target
 X = df.drop("target", axis=1)
@@ -27,13 +27,13 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Start MLflow run
 with mlflow.start_run():
 
-    # Buat model
+    # Model
     model = LogisticRegression(max_iter=1000)
 
     # Training
     model.fit(X_train, y_train)
 
-    # Prediksi
+    # Predict
     y_pred = model.predict(X_test)
 
     # Evaluasi
@@ -41,5 +41,8 @@ with mlflow.start_run():
 
     print("Accuracy:", acc)
 
-    # Logging manual tambahan
+    # Manual logging
     mlflow.log_metric("accuracy_manual", acc)
+
+    # Log model artifact
+    mlflow.sklearn.log_model(model, "model")

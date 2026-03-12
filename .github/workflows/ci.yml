@@ -1,48 +1,63 @@
-name: CI Workflow
+name: CI MLflow Pipeline
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build:
+  train:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout Repository
         uses: actions/checkout@v4
+
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
+
       - name: Install Dependencies
         run: |
-          pip install pandas scikit-learn matplotlib mlflow
+          pip install mlflow pandas scikit-learn matplotlib
 
-      - name: Run Training
+
+      # JALANKAN MLFLOW PROJECT (INI YANG BENAR)
+      - name: Run MLflow Project
         run: |
-          python MLProject/modelling.py
+          mlflow run MLProject
 
-      - name: Login Docker Hub
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Build Docker Image
-        run: |
-          mlflow build-docker -n heart-model MLProject
-
-      - name: Tag Docker Image
-        run: |
-          docker tag heart-model ${{ secrets.DOCKER_USERNAME }}/mlflow-heart-disease:latest
-
-      - name: Push Docker Image
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/mlflow-heart-disease:latest
-
+      # SIMPAN ARTEFAK
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: trained-model
-          path: .
+          path: mlruns
+
+
+      # BUILD DOCKER IMAGE
+      - name: Build Docker Image
+        run: |
+          mlflow build-docker -n heart-model MLProject
+
+
+      # LOGIN DOCKER HUB
+      - name: Login DockerHub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+
+      # TAG IMAGE
+      - name: Tag Docker Image
+        run: |
+          docker tag heart-model ${{ secrets.DOCKER_USERNAME }}/mlflow-heart:latest
+
+
+      # PUSH IMAGE
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/mlflow-heart:latest
